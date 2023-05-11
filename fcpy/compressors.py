@@ -188,7 +188,7 @@ class Identity(Compressor):
         return arr, {}
 
     def do_decompress(self, compressed_data: np.ndarray, params: dict) -> np.ndarray:
-        return compressed_datat
+        return compressed_data
 
 
 class RandomProjection(Compressor):
@@ -196,25 +196,38 @@ class RandomProjection(Compressor):
 
     def do_compress(self, arr: np.ndarray, bits: int) -> Tuple[np.ndarray, dict]:
         import sklearn
-        from sklearn.random_projection import GaussianRandomProjection
+        from sklearn.preprocessing import StandardScaler
+        from sklearn.random_projection import SparseRandomProjection
 
         time, lev, lat, lon = arr.shape
 
-        data = arr.reshape((time * lev * lat, lon))
+        scaler = StandardScaler()
 
-        transformer = GaussianRandomProjection(
+        data = scaler.fit_transform(arr.reshape((time * lev * lat * lon, 1))).reshape(
+            (time * lev, lat * lon)
+        )
+
+        transformer = SparseRandomProjection(
             random_state=42, compute_inverse_components=True, n_components=bits
         )
         compressed_data = transformer.fit_transform(data)
 
-        return compressed_data, {"transformer": transformer, "shape": arr.shape}
+        return compressed_data, {
+            "scaler": scaler,
+            "transformer": transformer,
+            "shape": arr.shape,
+        }
 
     def do_decompress(self, compressed_data: np.ndarray, params: dict) -> np.array:
         time, lev, lat, lon = params["shape"]
 
         return (
-            params["transformer"]
-            .inverse_transform(compressed_data)
+            params["scaler"]
+            .inverse_transform(
+                params["transformer"]
+                .inverse_transform(compressed_data)
+                .reshape((time * lev * lat * lon, 1))
+            )
             .reshape((time, lev, lat, lon))
         )
 
@@ -228,7 +241,7 @@ class PCA(Compressor):
 
         time, lev, lat, lon = arr.shape
 
-        data = arr.reshape((time * lev * lat, lon))
+        data = arr.reshape((time * lev, lat * lon))
 
         transformer = PCA(random_state=42, n_components=bits)
         compressed_data = transformer.fit_transform(data)

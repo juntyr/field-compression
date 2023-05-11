@@ -143,7 +143,6 @@ def compute_histograms_single_variable(
     max_chunk_size_bytes: Optional[int] = None,
     max_chunk_fn: Optional[Callable] = None,
 ) -> Dict[str, Tuple[xr.DataArray, xr.DataArray]]:
-
     if baseline.bits is None:
         raise RuntimeError("bits parameter missing in baseline")
 
@@ -236,7 +235,6 @@ def compute_histograms_single_variable(
 
     t0 = time()
     for chunk in tqdm(max_chunk_fn(da), total=chunk_count):
-
         update_histogram(
             chunk.values,
             src_histogram_freqs,
@@ -359,7 +357,6 @@ def compute_histograms(
     bits: dict[str, list[int]] = None,
     max_chunk_size_bytes: Optional[int] = None,
 ) -> Dict[str, Tuple[xr.Dataset, xr.Dataset]]:
-
     histogram_frequencies = defaultdict(list)
     histogram_edges = defaultdict(list)
     for var_name in ds:
@@ -501,7 +498,6 @@ def compute_stats_direct(
     metrics: list[Type[Metric]],
     bits: dict[str, list[int]],
 ):
-
     das = []
     for var_name in ds:
         da = ds[var_name]
@@ -520,7 +516,6 @@ def compute_stats_direct_single_variable(
     metrics: list[Type[Metric]],
     bits: list[str],
 ):
-
     reductions = {
         "median": lambda d: np.median(d),
         "mean": lambda d: d.mean(),

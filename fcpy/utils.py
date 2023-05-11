@@ -45,7 +45,6 @@ def regrid(
 
     with open(path_to_template, "rb") as file_template:
         with tempfile.NamedTemporaryFile("wb") as file_filled:
-
             # Read the first message in the file
             msgid = ecc.codes_grib_new_from_file(file_template)
 
@@ -154,7 +153,6 @@ def to_bits(da, bits_params):
 
 
 def compute_min_bits(da, bits_params):
-
     bits_arr = to_bits(da, bits_params)
     used_sign_and_exponent_bits = 0
     for col in range(bits_params["sign_and_exponent_bits"]):

@@ -93,7 +93,11 @@ def compute_sigmas(da: xr.DataArray, compressors: list) -> xr.DataArray:
 
 
 def compute_knees_field(
-    da: xr.DataArray, da_sigmas: xr.DataArray, plot=False, interp_method="polynomial", polynomial_degree=4
+    da: xr.DataArray,
+    da_sigmas: xr.DataArray,
+    plot=False,
+    interp_method="polynomial",
+    polynomial_degree=4,
 ) -> dict:
     """Computes the point of maximum curvature.
 

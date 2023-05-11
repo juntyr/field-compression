@@ -140,7 +140,6 @@ class Round(Compressor):
     """Rounding compressor."""
 
     def get_used_sign_and_exponent_bits(self, arr: np.ndarray) -> int:
-
         bits_params = get_bits_params(arr)
         used_sign_and_exponent_bits = compute_min_bits(arr, bits_params)
 
@@ -180,3 +179,67 @@ class Log(Compressor):
 
     def do_decompress(self, compressed_data: np.ndarray, params: dict) -> np.ndarray:
         return np.expm1(compressed_data)
+
+
+class Identity(Compressor):
+    """Identity compressor, performs f(x)=x, i.e. no compression."""
+
+    def do_compress(self, arr: np.ndarray, bits: int) -> Tuple[np.ndarray, dict]:
+        return arr, {}
+
+    def do_decompress(self, compressed_data: np.ndarray, params: dict) -> np.ndarray:
+        return compressed_datat
+
+
+class RandomProjection(Compressor):
+    """Random projection compressor."""
+
+    def do_compress(self, arr: np.ndarray, bits: int) -> Tuple[np.ndarray, dict]:
+        import sklearn
+        from sklearn.random_projection import GaussianRandomProjection
+
+        time, lev, lat, lon = arr.shape
+
+        data = arr.reshape((time * lev * lat, lon))
+
+        transformer = GaussianRandomProjection(
+            random_state=42, compute_inverse_components=True, n_components=bits
+        )
+        compressed_data = transformer.fit_transform(data)
+
+        return compressed_data, {"transformer": transformer, "shape": arr.shape}
+
+    def do_decompress(self, compressed_data: np.ndarray, params: dict) -> np.array:
+        time, lev, lat, lon = params["shape"]
+
+        return (
+            params["transformer"]
+            .inverse_transform(compressed_data)
+            .reshape((time, lev, lat, lon))
+        )
+
+
+class PCA(Compressor):
+    """Principal Component Analysis compressor."""
+
+    def do_compress(self, arr: np.ndarray, bits: int) -> Tuple[np.ndarray, dict]:
+        import sklearn
+        from sklearn.decomposition import PCA
+
+        time, lev, lat, lon = arr.shape
+
+        data = arr.reshape((time * lev * lat, lon))
+
+        transformer = PCA(random_state=42, n_components=bits)
+        compressed_data = transformer.fit_transform(data)
+
+        return compressed_data, {"transformer": transformer, "shape": arr.shape}
+
+    def do_decompress(self, compressed_data: np.ndarray, params: dict) -> np.array:
+        time, lev, lat, lon = params["shape"]
+
+        return (
+            params["transformer"]
+            .inverse_transform(compressed_data)
+            .reshape((time, lev, lat, lon))
+        )

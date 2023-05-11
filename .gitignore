@@ -175,3 +175,5 @@ data/*
 !data/sample_ml_q.grib.xz
 
 report/workspace
+
+/miniconda3

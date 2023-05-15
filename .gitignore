@@ -177,3 +177,5 @@ data/*
 report/workspace
 
 /miniconda3
+
+/scripts/api.sh

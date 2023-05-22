@@ -14,4 +14,4 @@ fi
 
 eval "$(conda shell.bash hook)"
 conda activate fcpy
-jupyter-notebook --NotebookApp.allow_origin='*' notebooks/
+jupyter-notebook --NotebookApp.allow_origin='*' --NotebookApp.allow_remote_access=True notebooks/
